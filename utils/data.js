@@ -1,4 +1,4 @@
-import supabase from './supabase';
+import { supabase } from "./supabase";
 
 export const createHabit = async (userId, name, category) => {
   const { data, error } = await supabase
