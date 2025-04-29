@@ -1,5 +1,5 @@
-import TestAuthScreen from './screens/TestAuthScreen';
+import AppNavigator from "./navigation/AppNavigator";
 
 export default function App() {
-  return <TestAuthScreen />;
+  return <AppNavigator />;
 }
