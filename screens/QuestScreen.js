@@ -42,14 +42,14 @@ export default function QuestScreen({ navigation }) {
       <Text style={styles.title}>Available Quests</Text>
       <Button
         mode="contained"
-        onPress={() => handleAssignQuest('your-quest-id-1')} // Replace with actual quest ID
+        onPress={() => handleAssignQuest('7216517e-de37-4ff8-8c66-a426daa52b6f')} // Replace with actual quest ID
         style={styles.button}
       >
         Assign "Journey to Rivendell"
       </Button>
       <Button
         mode="contained"
-        onPress={() => handleAssignQuest('your-quest-id-2')} // Replace with actual quest ID
+        onPress={() => handleAssignQuest('c98878f8-1c78-449b-9f9b-e2cde743121a')} // Replace with actual quest ID
         style={styles.button}
       >
         Assign "Bilbo’s Adventure"
