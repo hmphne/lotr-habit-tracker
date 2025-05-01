@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 export function useTypewriter(text, speed = 30, pauseAfterPunctuation = 300) {
   const [typedText, setTypedText] = useState("");
+  const [finished, setFinished] = useState(false);
 
   useEffect(() => {
     let i = 0;
@@ -9,10 +10,9 @@ export function useTypewriter(text, speed = 30, pauseAfterPunctuation = 300) {
 
     const punctuationSet = new Set([".", "!", "?"]);
     setTypedText("");
+    setFinished(false);
 
     function typeNextChar() {
-      if (i >= text.length) return;
-
       const currentChar = text.charAt(i);
       setTypedText((prev) => prev + currentChar);
       i++;
@@ -22,13 +22,15 @@ export function useTypewriter(text, speed = 30, pauseAfterPunctuation = 300) {
 
       if (i < text.length) {
         timeout = setTimeout(typeNextChar, delay);
+      } else {
+        setFinished(true);
       }
     }
 
-    typeNextChar();
+    timeout = setTimeout(typeNextChar, speed);
 
     return () => clearTimeout(timeout);
   }, [text, speed, pauseAfterPunctuation]);
 
-  return typedText;
+  return { typedText, finished };
 }
