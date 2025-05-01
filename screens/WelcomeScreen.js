@@ -1,140 +1,111 @@
-import React, { useState, useRef } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Animated,
-  StyleSheet,
-} from "react-native";
-import Character from "../models/Character";
-import DialogueBubble from "../components/DialogueBubble";
-import { animateTiming } from "../utils/animationHelpers";
-import welcomeSteps from "../narrative/welcomeSteps";
+import { StyleSheet, View } from "react-native";
+import Narrator from "../components/Narrator";
+import { useEffect, useRef, useState } from "react";
+import { Button } from "react-native-paper";
+import AuthForm from "../components/AuthForm";
 
 export default function WelcomeScreen() {
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const characterPos = useRef([
-    new Animated.Value(0),
-    new Animated.Value(0),
-  ]).current;
-  const [dialogue, setDialogue] = useState(
-    ""
-  );
-  const [stepIndex, setStepIndex] = useState(0);
+  const timeoutRef = useRef(null);
+  const [step, setStep] = useState(0);
   const [showForm, setShowForm] = useState(false);
 
-  const nextStep = async () => {
-    const step = welcomeSteps[stepIndex];
-    console.log(`Moving to step ${stepIndex}`);
+  const nextStepHandler = () => {
+    timeoutRef.current = setTimeout(() => {
+      setStep((prevStep) => prevStep + 1);
+    }, 800);
+  };
 
-    // Optional character fade out
-    if (step.characterFadeOut) {
-      await animateTiming(fadeAnim, 0);
+  useEffect(() => {
+    return () => clearTimeout(timeoutRef.current);
+  }, []);
+
+  const revealScroll = () => {
+    nextStepHandler();
+    setShowForm(true);
+  };
+
+  const getDialogueForStep = () => {
+    switch (step) {
+      case 0:
+        return "Welcome, traveler. The realm is in peril and we need to do something!";
+      case 1:
+        return "The journey ahead will be dangerous, but we must stay strong.";
+      case 2:
+        return "Gather your allies, for the fate of the world depends on us.";
+      case 3:
+        return "Let's start your adventure!";
+      case 4:
+        return "...";
+      default:
+        return "come on.";
     }
-
-    // Execute step's custom logic
-    if (step.onComplete) {
-      await step.onComplete({
-        characterPos,
-        fadeAnim,
-        animateTiming,
-        setShowForm,
-      });
-    }
-
-    // Update character position
-    if (step.characterPos) {
-      characterPos[0].setValue(step.characterPos[0]);
-      characterPos[1].setValue(step.characterPos[1]);
-    }
-
-    // Update dialogue
-    if (step.dialogue) {
-      setDialogue(step.dialogue);
-    }
-
-    // Fade character back in if previously faded out
-    if (step.characterFadeOut || step.characterPos) {
-      await animateTiming(fadeAnim, 1);
-    }
-
-    setStepIndex(stepIndex + 1);
   };
 
   return (
     <View style={styles.container}>
-      {/* Character will be above the dialogue */}
-      <View style={styles.characterContainer}>
-        <Character
-          position={characterPos}
-          fadeAnim={fadeAnim}
-          style={styles.character}
-          image={require("../assets/character.jpg")}
-        />
+      <View style={styles.centeredContainer}>
+        <View
+          style={[
+            styles.narrator,
+            {
+              bottom: showForm ? 0 : "unset",
+            },
+          ]}
+        >
+          <Narrator
+            triggerNextStep={step === 3 ? () => {} : nextStepHandler}
+            imgSrc={require("../assets/character.jpg")}
+            dialogue={getDialogueForStep()}
+          />
+        </View>
+        {step === 3 && !showForm && (
+          <Button
+            mode="elevated"
+            style={styles.btn}
+            labelStyle={styles.btnLabel}
+            contentStyle={styles.btnContent}
+            onPress={revealScroll}
+          >
+            Reveal the scroll
+          </Button>
+        )}
+        {showForm && <AuthForm />}
       </View>
-
-      {/* Dialogue Bubble */}
-      <View style={styles.dialogueContainer}>
-        <DialogueBubble text={dialogue} onComplete={nextStep} />
-      </View>
-
-      {/* Reveal Scroll Button */}
-      {welcomeSteps[stepIndex]?.showButton && (
-        <TouchableOpacity style={styles.button} onPress={nextStep}>
-          <Text style={styles.buttonText}>Reveal the Scroll</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Form (appears after a certain step) */}
-      {showForm && (
-        <View style={styles.form}>{/* Your login/signup form here */}</View>
-      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
     flex: 1,
     backgroundColor: "#fdf6e3",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
   },
-  characterContainer: {
-    justifyContent: "center", // Centers the character vertically
-    alignItems: "center", // Centers the character horizontally
-    marginBottom: 50, // Reduce space between character and dialogue
-  },
-  dialogueContainer: {
-    // flex: 1,
+  centeredContainer: {
+    display: "flex",
+    alignSelf: "flex-start",
     justifyContent: "center",
     alignItems: "center",
+    height: "100%",
+    margin: "auto",
   },
-  button: {
-    marginTop: 20,
-    backgroundColor: "#8B4513",
-    padding: 10,
-    borderRadius: 8,
-    width: "100%",
-    maxWidth: 200,
+  narrator: {
+    position: "absolute",
     alignSelf: "center",
+    justifyContent: "center",
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
+  btnLabel: {
+    fontFamily: "RingBearer",
+    color: "#FBC841",
+    marginHorizontal: 8,
   },
-  form: {
-    // Style your form here when revealed
-    marginTop: 20,
-    padding: 20,
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    width: "100%",
-    maxWidth: 350,
+  btnContent: {
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+  },
+  btn: {
+    backgroundColor: "#639c76",
+    elevation: 10,
+    borderRadius: 10,
+    marginTop: 150,
   },
 });
