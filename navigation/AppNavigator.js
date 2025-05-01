@@ -1,18 +1,68 @@
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import AuthScreen from '../screens/AuthScreen';
-import HabitScreen from '../screens/HabitScreen';
-import QuestScreen from '../screens/QuestScreen';
+import React, { useContext } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 
-const Stack = createStackNavigator();
+import HabitScreen from "../screens/HabitScreen";
+import QuestScreen from "../screens/QuestScreen";
+import { AuthContext } from "../utils/authProvider";
+import WelcomeScreen from "../screens/WelcomeScreen";
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const tabRoutes = [
+  {
+    name: "Habits",
+    component: HabitScreen,
+    icon: "list-outline",
+  },
+  {
+    name: "Quests",
+    component: QuestScreen,
+    icon: "trophy-outline",
+  },
+];
+
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: "#2c2c2c" },
+        tabBarActiveTintColor: "#f0c000",
+        tabBarInactiveTintColor: "#aaa",
+        tabBarLabelStyle: { fontSize: 12, fontWeight: "bold" },
+      }}
+    >
+      {tabRoutes.map(({ name, component, icon }) => (
+        <Tab.Screen
+          key={name}
+          name={name}
+          component={component}
+          options={{
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons name={icon} size={size} color={color} />
+            ),
+          }}
+        />
+      ))}
+    </Tab.Navigator>
+  );
+}
 
 export default function AppNavigator() {
+  const { user } = useContext(AuthContext);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Auth">
-        <Stack.Screen name="Auth" component={AuthScreen} options={{ title: 'Sign In' }} />
-        <Stack.Screen name="Habits" component={HabitScreen} options={{ title: 'My Habits' }} />
-        <Stack.Screen name="Quests" component={QuestScreen} options={{ title: 'My Quests' }} />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!user ? (
+          <Stack.Screen name="Auth" component={WelcomeScreen} />
+        ) : (
+          <Stack.Screen name="Main" component={MainTabs} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
