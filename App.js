@@ -6,7 +6,7 @@ export default function App() {
   return (
     <AuthProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <AppNavigator />;
+        <AppNavigator />
       </GestureHandlerRootView>
     </AuthProvider>
   );
